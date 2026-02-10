@@ -35,9 +35,13 @@ public:
     Parser();
     std::vector<Token> tokenize(const std::string& expression);
     double parse(const std::string& expression);
+    void setVariables(const std::unordered_map<std::string, double>* vars) {
+        variables = vars;
+    }
 
 private:
     std::unordered_map<std::string, int> functionMap;
+    const std::unordered_map<std::string, double>* variables = nullptr;
     void initializeFunctions();
     
     double parseExpression(const std::vector<Token>& tokens, size_t& pos);

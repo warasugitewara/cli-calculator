@@ -109,7 +109,6 @@ void REPL::processCommand(const std::string& input) {
 
     if (cmd == "vars") {
         std::cout << "ans = " << calculator.formatResult(calculator.getLastResult()) << "\n";
-        std::cout << "No user variables defined\n";
         return;
     }
 
@@ -166,9 +165,16 @@ void REPL::processCommand(const std::string& input) {
     }
 
     try {
-        double result = calculator.calculate(cmd);
+        std::string expression = cmd;
+        
+        // If expression starts with an operator, prepend 'ans'
+        if (!cmd.empty() && (cmd[0] == '+' || cmd[0] == '-' || cmd[0] == '*' || cmd[0] == '/')) {
+            expression = "ans" + cmd;
+        }
+        
+        double result = calculator.calculate(expression);
         std::cout << calculator.formatResult(result) << "\n";
-        history.push_back(cmd);
+        history.push_back(cmd + " = " + calculator.formatResult(result));
     } catch (const std::exception& e) {
         std::cout << "Error: " << e.what() << "\n";
     }

@@ -234,6 +234,9 @@ double Parser::parseFactor(const std::vector<Token>& tokens, size_t& pos) {
 
     if (token.type == TokenType::VARIABLE) {
         pos++;
+        if (variables != nullptr && variables->find(token.value) != variables->end()) {
+            return variables->at(token.value);
+        }
         throw std::runtime_error("Variable not defined: " + token.value);
     }
 

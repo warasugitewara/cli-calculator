@@ -7,7 +7,9 @@ Calculator::Calculator() : precision(15), lastResult(0.0) {}
 
 double Calculator::calculate(const std::string& expression) {
     try {
+        parser.setVariables(&variables);
         lastResult = parser.parse(expression);
+        variables["ans"] = lastResult;  // Automatically update 'ans' variable
         return lastResult;
     } catch (const std::exception& e) {
         throw;
