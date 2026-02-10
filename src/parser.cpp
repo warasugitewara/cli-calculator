@@ -21,35 +21,52 @@ void Parser::initializeFunctions() {
 std::vector<Parser::Token> Parser::tokenize(const std::string& expression) {
     std::vector<Token> tokens;
     size_t i = 0;
+    
+    // Preprocess: Convert √ to sqrt(
+    // UTF-8 √ is E2 88 9A
+    std::string processed;
+    for (size_t j = 0; j < expression.length(); ) {
+        // Check for √ (UTF-8: E2 88 9A)
+        if (j + 2 < expression.length() && 
+            (unsigned char)expression[j] == 0xE2 && 
+            (unsigned char)expression[j+1] == 0x88 && 
+            (unsigned char)expression[j+2] == 0x9A) {
+            processed += "sqrt";
+            j += 3;
+        } else {
+            processed += expression[j];
+            j++;
+        }
+    }
 
-    while (i < expression.length()) {
-        if (std::isspace(expression[i])) {
+    while (i < processed.length()) {
+        if (std::isspace(processed[i])) {
             i++;
             continue;
         }
 
-        if (std::isdigit(expression[i]) || expression[i] == '.') {
+        if (std::isdigit(processed[i]) || processed[i] == '.') {
             std::string numStr;
-            while (i < expression.length() && (std::isdigit(expression[i]) || expression[i] == '.')) {
-                numStr += expression[i++];
+            while (i < processed.length() && (std::isdigit(processed[i]) || processed[i] == '.')) {
+                numStr += processed[i++];
             }
             
             // Check for scientific notation (e or E)
-            if (i < expression.length() && (expression[i] == 'e' || expression[i] == 'E')) {
+            if (i < processed.length() && (processed[i] == 'e' || processed[i] == 'E')) {
                 size_t tempI = i + 1;
                 // Handle optional + or - sign after e
-                if (tempI < expression.length() && (expression[tempI] == '+' || expression[tempI] == '-')) {
+                if (tempI < processed.length() && (processed[tempI] == '+' || processed[tempI] == '-')) {
                     tempI++;
                 }
                 // Check if there's at least one digit after e/E
-                if (tempI < expression.length() && std::isdigit(expression[tempI])) {
-                    numStr += expression[i++];
-                    if (i < expression.length() && (expression[i] == '+' || expression[i] == '-')) {
-                        numStr += expression[i++];
+                if (tempI < processed.length() && std::isdigit(processed[tempI])) {
+                    numStr += processed[i++];
+                    if (i < processed.length() && (processed[i] == '+' || processed[i] == '-')) {
+                        numStr += processed[i++];
                     }
                     // Collect exponent digits
-                    while (i < expression.length() && std::isdigit(expression[i])) {
-                        numStr += expression[i++];
+                    while (i < processed.length() && std::isdigit(processed[i])) {
+                        numStr += processed[i++];
                     }
                 }
             }
@@ -66,10 +83,10 @@ std::vector<Parser::Token> Parser::tokenize(const std::string& expression) {
             continue;
         }
 
-        if (std::isalpha(expression[i])) {
+        if (std::isalpha(processed[i])) {
             std::string name;
-            while (i < expression.length() && (std::isalnum(expression[i]) || expression[i] == '_')) {
-                name += expression[i++];
+            while (i < processed.length() && (std::isalnum(processed[i]) || processed[i] == '_')) {
+                name += processed[i++];
             }
 
             Token token;
@@ -96,7 +113,7 @@ std::vector<Parser::Token> Parser::tokenize(const std::string& expression) {
             continue;
         }
 
-        switch (expression[i]) {
+        switch (processed[i]) {
             case '+': {
                 Token token;
                 token.type = TokenType::PLUS;
@@ -178,7 +195,7 @@ std::vector<Parser::Token> Parser::tokenize(const std::string& expression) {
                 break;
             }
             default:
-                throw std::runtime_error(std::string("Unknown character: ") + expression[i]);
+                throw std::runtime_error(std::string("Unknown character: ") + processed[i]);
         }
     }
 

@@ -21,6 +21,7 @@ public:
         VARIABLE,
         COMMA,
         ASSIGN,     // =
+        SQRT,       // √
         END,
         UNKNOWN
     };
