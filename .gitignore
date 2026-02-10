@@ -1,0 +1,55 @@
+# CMakeビルドディレクトリ
+build/
+cmake_build/
+out/
+
+# Visual Studio
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.sln
+Debug/
+Release/
+x64/
+MinSizeRel/
+RelWithDebInfo/
+
+# GCC/Make
+*.o
+*.a
+*.so
+*.dylib
+Makefile
+compile_commands.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 実行ファイル
+*.exe
+*.out
+*.bin
+calcpp
+
+# 一時ファイル
+*.tmp
+*.bak
+*.log
+
+# Pythonキャッシュ
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ユーザー設定ファイル
+.env
+local_config.txt
+
+# テンポラリ
+temp/
+tmp/
