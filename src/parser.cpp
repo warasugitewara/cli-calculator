@@ -36,14 +36,21 @@ std::vector<Parser::Token> Parser::tokenize(const std::string& expression) {
             
             // Check for scientific notation (e or E)
             if (i < expression.length() && (expression[i] == 'e' || expression[i] == 'E')) {
-                numStr += expression[i++];
+                size_t tempI = i + 1;
                 // Handle optional + or - sign after e
-                if (i < expression.length() && (expression[i] == '+' || expression[i] == '-')) {
-                    numStr += expression[i++];
+                if (tempI < expression.length() && (expression[tempI] == '+' || expression[tempI] == '-')) {
+                    tempI++;
                 }
-                // Collect exponent digits
-                while (i < expression.length() && std::isdigit(expression[i])) {
+                // Check if there's at least one digit after e/E
+                if (tempI < expression.length() && std::isdigit(expression[tempI])) {
                     numStr += expression[i++];
+                    if (i < expression.length() && (expression[i] == '+' || expression[i] == '-')) {
+                        numStr += expression[i++];
+                    }
+                    // Collect exponent digits
+                    while (i < expression.length() && std::isdigit(expression[i])) {
+                        numStr += expression[i++];
+                    }
                 }
             }
             
@@ -289,6 +296,9 @@ double Parser::parseTerm(const std::vector<Token>& tokens, size_t& pos) {
                 throw std::runtime_error("Modulo by zero");
             }
             result = std::fmod(result, mod);
+        } else if (token.type == TokenType::FUNCTION || (token.type == TokenType::LPAREN && pos > 0)) {
+            // Implicit multiplication: 2log(x) -> 2*log(x), 2(3+4) -> 2*(3+4)
+            result *= parsePower(tokens, pos);
         } else {
             break;
         }
@@ -305,6 +315,14 @@ double Parser::parsePower(const std::vector<Token>& tokens, size_t& pos) {
         if (token.type == TokenType::POW) {
             pos++;
             result = std::pow(result, parseFactor(tokens, pos));
+        } else if (token.type == TokenType::FUNCTION || 
+                   (token.type == TokenType::NUMBER && token.value != "(" && token.value != ")")) {
+            // Implicit multiplication: 2pi -> 2*pi (but not at end of expression)
+            if (pos < tokens.size()) {
+                result *= parseFactor(tokens, pos);
+            } else {
+                break;
+            }
         } else {
             break;
         }
